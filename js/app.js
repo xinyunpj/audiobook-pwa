@@ -28,8 +28,13 @@ const App = (() => {
   }
 
   function openReader(bookId) {
+    console.log('App.openReader called with:', bookId);
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    Reader.open(bookId);
+    if (typeof Reader.open === 'function') {
+      Reader.open(bookId);
+    } else {
+      console.error('Reader.open is not a function');
+    }
   }
 
   return { init, showBookshelf, openReader };

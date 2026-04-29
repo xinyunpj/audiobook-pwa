@@ -6,7 +6,6 @@
 const Bookshelf = (() => {
   let books = [];
   let deleteMode = false;
-  let longPressTimer = null;
 
   const container = document.getElementById('bookshelf-page');
   const bookGrid = document.getElementById('book-grid');
@@ -19,7 +18,6 @@ const Bookshelf = (() => {
     importBtn.addEventListener('click', () => hiddenInput.click());
     importEmptyBtn.addEventListener('click', () => hiddenInput.click());
     hiddenInput.addEventListener('change', handleFileImport);
-    document.addEventListener('touchmove', clearLongPress, { passive: true });
   }
 
   async function loadBooks() {
@@ -65,11 +63,12 @@ const Bookshelf = (() => {
   function handleCardClick(e) {
     const card = e.target.closest('.book-card');
     if (!card) return;
-
+    e.preventDefault();
+    
     const id = card.dataset.id;
+    if (!id) return;
 
     if (deleteMode) {
-      // Confirm delete
       if (confirm('确定删除这本书吗？')) {
         deleteBookById(id);
       }
@@ -78,80 +77,60 @@ const Bookshelf = (() => {
 
     // Open reader
     const app = window.App;
-    if (app) app.openReader(id);
-  }
-
-  function handleCardLongPress(e) {
-    const card = e.target.closest('.book-card');
-    if (!card) return;
-    e.preventDefault();
-
-    deleteMode = true;
-    document.querySelectorAll('.book-card').forEach(c => c.classList.add('show-delete'));
-  }
-
-  function clearLongPress() {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
+    if (app) {
+      app.openReader(id);
     }
   }
 
-  // Click handlers via delegation
-  document.addEventListener('click', (e) => {
+  function handleDeleteClick(e) {
+    const btn = e.target.closest('.delete-btn');
+    if (!btn) return;
+    e.stopPropagation();
+    const id = btn.dataset.id;
+    if (id && confirm('确定删除这本书吗？')) {
+      deleteBookById(id);
+    }
+  }
+
+  // Simple click delegation - works on all platforms
+  document.addEventListener('click', function(e) {
     if (e.target.closest('.book-card')) {
       handleCardClick(e);
     }
     if (e.target.closest('.delete-btn')) {
-      const id = e.target.closest('.delete-btn').dataset.id;
-      if (confirm('确定删除这本书吗？')) {
-        deleteBookById(id);
-      }
+      handleDeleteClick(e);
     }
-  });
-
-  // Long press via pointer events
-  let pressStart = null;
-  document.addEventListener('pointerdown', (e) => {
-    const card = e.target.closest('.book-card');
-    if (!card) return;
-    pressStart = { x: e.clientX, y: e.clientY, card, time: Date.now() };
-    longPressTimer = setTimeout(() => {
-      if (pressStart) {
-        deleteMode = true;
-        document.querySelectorAll('.book-card').forEach(c => c.classList.add('show-delete'));
-      }
-    }, 500);
-  });
-
-  document.addEventListener('pointermove', (e) => {
-    if (pressStart) {
-      const dx = e.clientX - pressStart.x;
-      const dy = e.clientY - pressStart.y;
-      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-        clearLongPress();
-        pressStart = null;
-      }
-    }
-  });
-
-  document.addEventListener('pointerup', () => {
-    clearLongPress();
-    pressStart = null;
-  });
-
-  document.addEventListener('pointercancel', () => {
-    clearLongPress();
-    pressStart = null;
-  });
-
-  // Tap on empty area to exit delete mode
-  document.addEventListener('click', (e) => {
-    if (deleteMode && !e.target.closest('.book-card') && !e.target.closest('.delete-btn') && !e.target.closest('.header-btn')) {
+    // Exit delete mode on background click
+    if (deleteMode && !e.target.closest('.book-card') && !e.target.closest('.header-btn')) {
       deleteMode = false;
       document.querySelectorAll('.book-card').forEach(c => c.classList.remove('show-delete'));
     }
   });
+
+  // Long press for delete mode (mobile)
+  let longPressTimer = null;
+  document.addEventListener('touchstart', function(e) {
+    const card = e.target.closest('.book-card');
+    if (!card || deleteMode) return;
+    longPressTimer = setTimeout(() => {
+      deleteMode = true;
+      document.querySelectorAll('.book-card').forEach(c => c.classList.add('show-delete'));
+    }, 500);
+  }, { passive: true });
+  
+  document.addEventListener('touchend', function() {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  }, { passive: true });
+  
+  document.addEventListener('touchmove', function() {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  }, { passive: true });
 
   async function handleFileImport(e) {
     const files = e.target.files;
@@ -177,7 +156,6 @@ const Bookshelf = (() => {
     if (name.endsWith('.txt')) {
       content = await readFileAsText(file);
     } else if (name.endsWith('.epub')) {
-      // Need to load JSZip first
       await loadJSZip();
       const result = await EpubParser.parse(file);
       title = result.title;
@@ -215,7 +193,6 @@ const Bookshelf = (() => {
 
   async function loadJSZip() {
     if (window.JSZip) return;
-    // Dynamic import JSZip CDN
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
