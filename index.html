@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-font-size="medium">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="有声书架">
+  <meta name="theme-color" content="#1a73e8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <title>有声书架</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ============================
+       Bookshelf Page
+       ============================ -->
+  <div id="bookshelf-page" class="page active">
+    <div class="header safe-top">
+      <h1>有声书架</h1>
+      <div class="header-actions">
+        <button class="header-btn" id="import-btn" title="导入书籍">➕</button>
+      </div>
+    </div>
+
+    <div class="bookshelf-content">
+      <div id="empty-state" class="empty-state">
+        <div class="empty-icon">📚</div>
+        <div class="empty-title">还没有书</div>
+        <div class="empty-desc">点击下方按钮导入你的第一本有声书<br>支持 .txt 和 .epub 格式</div>
+        <button class="import-btn" id="import-empty-btn">📥 导入书籍</button>
+      </div>
+      <div id="book-grid" class="book-grid"></div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="file-input" accept=".txt,.epub" multiple style="display:none">
+  </div>
+
+  <!-- ============================
+       Reader Page
+       ============================ -->
+  <div id="reader-page" class="page">
+    <!-- Reader header -->
+    <div class="reader-header safe-top">
+      <button class="reader-back" id="reader-back">‹</button>
+      <span class="reader-title" id="reader-title">书名</span>
+      <span class="reader-progress-info" id="reader-progress">0%</span>
+    </div>
+
+    <!-- Reader toolbar -->
+    <div class="reader-toolbar">
+      <button class="tool-btn" id="font-toggle" title="字体大小">A</button>
+      <button class="tool-btn" id="theme-toggle" title="主题">🌙</button>
+      <div style="flex:1"></div>
+      <button class="tool-btn" id="voice-select-btn" title="选择语音">🗣️</button>
+    </div>
+
+    <!-- Reader body -->
+    <div class="reader-body" id="reader-body"></div>
+
+    <!-- Bottom controls -->
+    <div class="reader-controls safe-bottom">
+      <div class="tts-controls">
+        <!-- Progress bar -->
+        <div class="tts-progress-bar">
+          <div class="tts-progress-fill" id="tts-progress-fill"></div>
+        </div>
+
+        <!-- Main playback controls -->
+        <div class="tts-main-controls">
+          <button class="ctrl-btn" id="prev-btn" title="快退 15s">⏪</button>
+          <button class="ctrl-btn primary" id="play-btn" title="播放/暂停">▶</button>
+          <button class="ctrl-btn" id="stop-btn" title="停止">⏹</button>
+          <button class="ctrl-btn" id="next-btn" title="快进 15s">⏩</button>
+        </div>
+
+        <!-- Speed control -->
+        <div class="tts-settings">
+          <span style="font-size:12px;color:var(--text-secondary)">语速</span>
+          <input type="range" class="speed-slider" id="speed-slider" min="0.5" max="3" step="0.1" value="1">
+          <span class="speed-display" id="speed-display">1.0x</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================
+       Voice Picker Modal
+       ============================ -->
+  <div class="modal-overlay" id="modal-overlay"></div>
+  <div class="modal-overlay" id="voice-modal">
+    <div class="modal-sheet">
+      <h3>选择朗读语音</h3>
+      <div id="voice-list"></div>
+    </div>
+  </div>
+
+  <!-- ============================
+       Scripts
+       ============================ -->
+  <!-- JSZip for EPUB support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- App modules -->
+  <script src="/js/storage.js"></script>
+  <script src="/js/epub.js"></script>
+  <script src="/js/tts.js"></script>
+  <script src="/js/bookshelf.js"></script>
+  <script src="/js/reader.js"></script>
+  <script src="/js/app.js"></script>
+
+</body>
+</html>
