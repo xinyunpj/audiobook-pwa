@@ -61,6 +61,9 @@ const TTS = (() => {
     speakCurrent(speed, voiceURI, onDone);
   }
 
+  let retryCount = 0;
+  const MAX_RETRIES = 3;
+
   function speakCurrent(speed, voiceURI, onDone) {
     if (currentSentenceIndex >= sentences.length) {
       isPlaying = false;
@@ -75,6 +78,11 @@ const TTS = (() => {
       currentSentenceIndex++;
       speakCurrent(speed, voiceURI, onDone);
       return;
+    }
+
+    // iOS Safari workaround: cancel any pending speech
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
     }
 
     utterance = new SpeechSynthesisUtterance(text);
@@ -96,6 +104,7 @@ const TTS = (() => {
     }
 
     utterance.onstart = () => {
+      retryCount = 0;
       if (onSentenceChange) onSentenceChange(currentSentenceIndex);
     };
 
@@ -113,11 +122,19 @@ const TTS = (() => {
         console.warn('TTS error:', e.error);
         if (onError) onError(e.error);
       }
-      // Resume from next sentence
-      currentSentenceIndex++;
-      setTimeout(() => {
-        speakCurrent(speed, voiceURI, onDone);
-      }, 100);
+      // Retry current sentence if still playing
+      if (isPlaying && retryCount < MAX_RETRIES) {
+        retryCount++;
+        setTimeout(() => {
+          speakCurrent(speed, voiceURI, onDone);
+        }, 200);
+      } else {
+        retryCount = 0;
+        currentSentenceIndex++;
+        setTimeout(() => {
+          speakCurrent(speed, voiceURI, onDone);
+        }, 100);
+      }
     };
 
     window.speechSynthesis.speak(utterance);

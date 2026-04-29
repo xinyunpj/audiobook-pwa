@@ -225,6 +225,15 @@ const Reader = (() => {
     } else {
       // Start from current position
       const idx = TTS.getCurrentIndex();
+      // iOS Safari: ensure voices are loaded before speaking
+      if (typeof speechSynthesis !== 'undefined') {
+        // Pre-warm: some iOS versions need a silent utterance first
+        try {
+          const warmup = new SpeechSynthesisUtterance(' ');
+          warmup.volume = 0;
+          speechSynthesis.speak(warmup);
+        } catch(e) {}
+      }
       TTS.speakFrom(idx, speed, voiceURI, () => {});
       playBtn.textContent = '⏸';
     }
