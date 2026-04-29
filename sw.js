@@ -1,17 +1,17 @@
 const CACHE_NAME = 'audiobook-pwa-v1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/app.js',
-  '/js/bookshelf.js',
-  '/js/reader.js',
-  '/js/tts.js',
-  '/js/storage.js',
-  '/js/epub.js',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  './',
+  './index.html',
+  './css/style.css',
+  './js/app.js',
+  './js/bookshelf.js',
+  './js/reader.js',
+  './js/tts.js',
+  './js/storage.js',
+  './js/epub.js',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -59,7 +59,7 @@ self.addEventListener('fetch', event => {
       }).catch(() => {
         // Offline fallback: return cached index for navigation
         if (request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         }
         return new Response('Offline', { status: 503 });
       });

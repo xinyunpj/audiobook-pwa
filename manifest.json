@@ -2,7 +2,7 @@
   "name": "有声书架",
   "short_name": "有声书",
   "description": "漂亮的有声书阅读器，支持TXT和EPUB格式",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1a73e8",
