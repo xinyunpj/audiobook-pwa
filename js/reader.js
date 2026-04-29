@@ -51,6 +51,7 @@ const Reader = (() => {
     nextBtn.addEventListener('click', seekForward);
     stopBtn.addEventListener('click', stopPlayback);
     speedSlider.addEventListener('input', onSpeedChange);
+    speedSlider.addEventListener('change', onSpeedChange);
     voiceSelectBtn.addEventListener('click', showVoicePicker);
     modalOverlay.addEventListener('click', closeVoicePicker);
     fontToggle.addEventListener('click', cycleFontSize);
@@ -275,6 +276,13 @@ const Reader = (() => {
     speed = parseFloat(speedSlider.value);
     Storage.setSpeed(speed);
     updateSpeedUI();
+    // If currently playing, restart with new speed
+    if (TTS.isActive()) {
+      const idx = TTS.getCurrentIndex();
+      TTS.stop();
+      TTS.speakFrom(idx, speed, voiceURI, () => {});
+      playBtn.textContent = '⏸';
+    }
   }
 
   function updateSpeedUI() {
