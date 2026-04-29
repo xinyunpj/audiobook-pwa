@@ -234,3 +234,5 @@ const Bookshelf = (() => {
 
   return { init, loadBooks };
 })();
+
+window.Bookshelf = Bookshelf;

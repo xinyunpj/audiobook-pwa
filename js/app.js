@@ -35,6 +35,9 @@ const App = (() => {
   return { init, showBookshelf, openReader };
 })();
 
+// Expose to window for other modules
+window.App = App;
+
 // Start when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => App.init());

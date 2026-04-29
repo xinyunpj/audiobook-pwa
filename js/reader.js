@@ -382,3 +382,5 @@ const Reader = (() => {
 
   return { init, open };
 })();
+
+window.Reader = Reader;

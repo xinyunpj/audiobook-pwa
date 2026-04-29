@@ -129,3 +129,5 @@ const Storage = (() => {
     getVoiceURI, setVoiceURI
   };
 })();
+
+window.Storage = Storage;

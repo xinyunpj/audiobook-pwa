@@ -190,3 +190,5 @@ const TTS = (() => {
     isPausedState
   };
 })();
+
+window.TTS = TTS;
