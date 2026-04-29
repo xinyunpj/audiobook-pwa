@@ -89,19 +89,24 @@ const TTS = (() => {
     utterance.rate = speed;
     utterance.volume = 1;
 
-    // Try to set voice
+    // Try to set voice (user-selected first)
     if (voiceURI) {
       const voices = window.speechSynthesis.getVoices();
       const voice = voices.find(v => v.voiceURI === voiceURI);
       if (voice) utterance.voice = voice;
     }
 
-    // For Chinese content, auto-pick a Chinese voice if none selected
+    // Auto-pick best Chinese voice
     if (!utterance.voice) {
       const voices = window.speechSynthesis.getVoices();
-      const zhVoice = voices.find(v => v.lang && v.lang.startsWith('zh'));
-      if (zhVoice) utterance.voice = zhVoice;
+      let bestVoice = voices.find(v => v.voiceURI && v.voiceURI.includes('Tingting'));
+      if (!bestVoice) bestVoice = voices.find(v => v.lang === 'zh-CN');
+      if (!bestVoice) bestVoice = voices.find(v => v.lang && v.lang.startsWith('zh'));
+      if (bestVoice) utterance.voice = bestVoice;
     }
+
+    // Slight pitch for naturalness
+    utterance.pitch = 1.0;
 
     utterance.onstart = () => {
       retryCount = 0;
@@ -111,10 +116,12 @@ const TTS = (() => {
     utterance.onend = () => {
       if (onProgress) onProgress(currentSentenceIndex + 1, sentences.length);
       currentSentenceIndex++;
-      // Small delay between sentences for natural flow
+      // Longer pause between sentences for natural reading flow
+      // Slower speed = longer pause
+      const pauseMs = Math.max(80, Math.round(200 / speed));
       setTimeout(() => {
         speakCurrent(speed, voiceURI, onDone);
-      }, 50);
+      }, pauseMs);
     };
 
     utterance.onerror = (e) => {

@@ -279,7 +279,7 @@ const Reader = (() => {
 
   function updateSpeedUI() {
     speedSlider.value = speed;
-    speedDisplay.textContent = speed.toFixed(1) + 'x';
+    speedDisplay.textContent = speed.toFixed(2) + 'x';
   }
 
   function updateProgressDisplay() {
