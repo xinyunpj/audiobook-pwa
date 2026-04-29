@@ -64,6 +64,17 @@ const TTS = (() => {
   let retryCount = 0;
   const MAX_RETRIES = 3;
 
+  // Get latest speed from localStorage for real-time speed changes
+  function getLatestSpeed(defaultSpeed) {
+    try {
+      const stored = localStorage.getItem('audiobook_speed');
+      if (stored !== null) {
+        return parseFloat(stored) || defaultSpeed;
+      }
+    } catch(e) {}
+    return defaultSpeed;
+  }
+
   function speakCurrent(speed, voiceURI, onDone) {
     if (currentSentenceIndex >= sentences.length) {
       isPlaying = false;
@@ -80,13 +91,16 @@ const TTS = (() => {
       return;
     }
 
-    // iOS Safari workaround: cancel any pending speech
+    // iOS Safari workaround
     if (window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
     }
 
+    // Always read latest speed from storage (user may have changed it)
+    const effectiveSpeed = getLatestSpeed(speed);
+
     utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = speed;
+    utterance.rate = effectiveSpeed;
     utterance.volume = 1;
 
     // Try to set voice (user-selected first)
@@ -118,7 +132,8 @@ const TTS = (() => {
       currentSentenceIndex++;
       // Longer pause between sentences for natural reading flow
       // Slower speed = longer pause
-      const pauseMs = Math.max(80, Math.round(200 / speed));
+      const currentSpeed = getLatestSpeed(speed);
+      const pauseMs = Math.max(80, Math.round(200 / currentSpeed));
       setTimeout(() => {
         speakCurrent(speed, voiceURI, onDone);
       }, pauseMs);

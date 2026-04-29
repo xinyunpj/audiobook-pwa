@@ -276,13 +276,7 @@ const Reader = (() => {
     speed = parseFloat(speedSlider.value);
     Storage.setSpeed(speed);
     updateSpeedUI();
-    // If currently playing, restart with new speed
-    if (TTS.isActive()) {
-      const idx = TTS.getCurrentIndex();
-      TTS.stop();
-      TTS.speakFrom(idx, speed, voiceURI, () => {});
-      playBtn.textContent = '⏸';
-    }
+    // Speed will apply on next sentence (no restart needed)
   }
 
   function updateSpeedUI() {
